@@ -1,65 +1,123 @@
-# WorkDueSoon — offline assignment & test tracker for iPhone
+# WorkDueSoon
 
-WorkDueSoon is a web app that installs to your iPhone home screen. After the first
-install it opens like a normal app and works fully offline. You can add, edit
-and complete items with no internet, and your list is saved on your phone.
+A simple app to keep track of your college assignments and tests. Add what you have due and
+when it's due, and it shows you everything coming up with a countdown. Late stuff turns red,
+and finished stuff goes into History.
 
-## One-time setup (about 5 minutes, free, no Mac needed)
+It works on your iPhone like a normal app, even with no internet.
 
-The files need to be put online **once** so Safari can install the app. After
-that, the app runs from your phone without internet.
+**Open the app:** https://hezki-png.github.io/WorkDueSoon-Scheduling-App/
 
-### Option A — GitHub Pages (free, permanent, can be done entirely on your iPhone)
-1. Unzip this file (on iPhone: tap it in the **Files** app).
-2. Go to **github.com** in Safari and create a free account.
-3. Tap **+ → New repository**. Name it `workduesoon`, set it to **Public**, tap **Create repository**.
-4. Tap **uploading an existing file**, then choose all 7 files from the unzipped folder:
-   `index.html`, `sw.js`, `manifest.webmanifest`, `icon-180.png`, `icon-192.png`, `icon-512.png`, `README.md`.
-   Tap **Commit changes**.
-5. Open **Settings → Pages**. Under *Branch*, choose **main**, then **/ (root)**, then **Save**.
-6. Wait about a minute. Your app will be at `https://YOUR-USERNAME.github.io/workduesoon/`.
+---
 
-### Option B — Netlify Drop (fastest from a Windows PC)
-Go to **app.netlify.com/drop** and drag the unzipped WorkDueSoon folder onto the page. Create a
-free account when asked so the site isn't deleted after an hour.
+## Put it on your iPhone
 
-## Install on your iPhone
-1. Open your app's link in **Safari**. It must be Safari, not Chrome.
-2. Tap **Share ⬆︎ → Add to Home Screen → Add**.
-3. Open **WorkDueSoon** from the home screen once while you're online. From then on
-   it works offline.
+1. Open the link above in **Safari**. It has to be Safari, not Chrome.
+2. Tap the **Share** button (the square with the arrow pointing up).
+3. Scroll down and tap **Add to Home Screen**, then **Add**.
+4. Open **WorkDueSoon** from your home screen once while you have internet.
 
-Always open it from the home-screen icon, not the Safari tab. The home-screen app
-keeps its own saved data.
+After that it works offline. Always open it from the home screen icon, not from Safari,
+because that's where your list is saved.
 
-## Using it
-- **+** adds an assignment, test or other activity.
-- The due date and time are separate boxes. Type into either one, or tap its icon for a
-  drop-down calendar or time list.
-  - Dates you can type: `10/3`, `Oct 3`, `3 October 2026`, `2026-10-03`, `tomorrow`, `fri`,
-    `next monday`, `in 2 weeks`. Number order follows your phone's region (month/day in the US,
-    day/month elsewhere).
-  - Times you can type: `9pm`, `930pm`, `9:30 am`, `21:30`, `noon`, `midnight`.
-- Items stay in Upcoming until you mark them done. Once the due time passes, an item moves
-  to an **Overdue** section at the top, turns red, gets a red **DUE** tag and shows how long
-  it's overdue (for example "Overdue by 2d 5h").
-- Items are grouped by day. The countdown turns orange under 3 days and red under 24 hours.
-- Tap the **circle** and it asks first: **Mark as done** moves the item to History, **Delete**
-  removes it completely after a second confirmation, and **Cancel** leaves it alone.
-- Tap an item to edit it, mark it done or delete it.
-- **History** shows everything you've completed, labelled *On time* or *Late*. Tap an entry to see its
-  details, move it back to Upcoming with a new due date, or delete it.
-  **Clear History** at the bottom empties the list.
-- Use the chips at the top to show all items, only assignments, only tests or only other.
-- The **moon/sun button** switches between light and dark mode. **⋯ → Appearance** also has
-  *Automatic*, which follows your iPhone's setting.
-- **⋯ → Save backup file** exports your list. **Restore from backup** brings it back.
-  Save a backup now and then, because deleting the app deletes its data.
+---
 
-## Limitations
-- There are no push reminders. iPhone web apps can't schedule notifications offline.
-- Data lives on this one phone and doesn't sync to other devices.
+## Adding something
 
-## Updating the app later
-Replace the files on GitHub or Netlify, and change `duesoon-v1` in `sw.js` to
-`duesoon-v2`. Open the app twice while online to pick up the new version.
+1. Tap the purple **+** button.
+2. Type a **title**, like "Essay draft".
+3. Type the **course** if you want, like "ENG 102". It remembers courses you've used before.
+4. Pick **Assignment**, **Test** or **Other**.
+5. Set the **due date** and **time**, then tap **Save**.
+
+### Setting the date and time
+
+You can type into the boxes or tap the icons to pick.
+
+- Tap the **calendar icon** to pick a day. There are also **Today**, **Tomorrow** and **In a week** buttons.
+- Tap the **clock icon** to pick a time. There are quick buttons for 9:00 AM, 12:00 PM, 5:00 PM and 11:59 PM.
+
+Things you can type for the date:
+
+| You type | You get |
+|---|---|
+| `tomorrow` | tomorrow |
+| `fri` or `next friday` | the next Friday |
+| `oct 3` or `3 oct` | October 3 |
+| `10/3` | October 3 (US) or 10 March (UK and most other places) |
+| `in 2 weeks` | two weeks from today |
+
+Things you can type for the time: `9pm`, `930pm`, `9:30 am`, `21:30`, `noon`, `midnight`.
+
+When you tap out of the box it shows the full date, like "Sat, Oct 3, 2026", so you can check
+it's right. If it can't understand what you typed, the box turns red and shows an example.
+
+---
+
+## Reading your list
+
+- Everything is sorted by day: **Today**, **Tomorrow**, then the days after.
+- Each item shows a countdown, like "in 5h" or "in 3 days".
+  - **Orange** means it's due within 3 days.
+  - **Red** means it's due within 24 hours.
+- When something is past its due time, it moves to **Overdue** at the top. It turns red, gets a
+  red **DUE** tag, and shows how late it is, like "Overdue by 2h 15m".
+- Use **All**, **Assignments**, **Tests** and **Other** at the top to filter the list.
+
+---
+
+## Finishing something
+
+Tap the **circle** next to an item. It will ask you what to do:
+
+- **Mark as done** moves it to History.
+- **Delete** removes it completely. It asks you again before deleting.
+- **Cancel** leaves it alone.
+
+Tapped the wrong thing? Tap **Undo** at the bottom of the screen within 5 seconds.
+
+To change an item, tap on it. You can edit anything, mark it done or delete it from there.
+
+---
+
+## History
+
+Tap **History** at the top to see everything you've finished.
+
+- Each item says **On time** or **Late**, depending on whether you checked it off before it was due.
+- Tap an item to see its details. You can **move it back to Upcoming** (for example if a
+  deadline got pushed back) or delete it.
+- **Clear History** at the bottom deletes everything in History.
+
+---
+
+## Light and dark mode
+
+Tap the **moon** or **sun** button at the top to switch between them.
+
+Tap **⋯ → Appearance** and pick **Automatic** if you want it to follow your iPhone's setting.
+
+---
+
+## Backing up your list
+
+Your list is only saved on your phone. **If you delete the app from your home screen, your
+list is deleted too.**
+
+To save a backup:
+1. Tap **⋯** at the top.
+2. Tap **Save backup file** and save it to Files or send it to yourself.
+
+To get your list back:
+1. Tap **⋯**.
+2. Tap **Restore from backup** and pick the backup file.
+
+It's a good idea to save a backup every couple of weeks.
+
+---
+
+## Good to know
+
+- There are **no notifications**. Open the app to check what's due.
+- Your list **doesn't sync** between devices. It stays on the phone you use it on.
+- If the app ever looks out of date, open it twice while you have internet and it will update.
