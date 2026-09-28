@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>WorkDueSoon</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="WorkDueSoon">
+<meta name="theme-color" content="#f2f2f7" id="themeColor">
+<script>
+  // Apply the saved appearance before the page draws, so it never flashes the wrong colours.
+  try { var t = localStorage.getItem('duesoon.theme'); if (t === 'light' || t === 'dark') document.documentElement.dataset.theme = t; } catch (e) {}
+</script>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{
+  --bg:#f2f2f7; --card:#ffffff; --text:#1c1c1e; --muted:#6e6e73; --line:rgba(60,60,67,.14);
+  --field:rgba(118,118,128,.12); --seg-on:#ffffff;
+  --accent:#4f46e5; --accent-soft:rgba(79,70,229,.12);
+  --test:#ea580c; --test-soft:rgba(234,88,12,.13);
+  --other:#0d9488; --other-soft:rgba(13,148,136,.13);
+  --danger:#dc2626; --danger-soft:rgba(220,38,38,.08); --danger-line:rgba(220,38,38,.35); --warn:#b45309; --ok:#16a34a;
+  --shadow:0 1px 2px rgba(0,0,0,.05),0 8px 24px rgba(0,0,0,.06);
+  --toast:#1c1c1e; color-scheme:light;
+}
+/* Automatic: follow the phone's setting unless Light was chosen */
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#000000; --card:#1c1c1e; --text:#f2f2f7; --muted:#98989f; --line:rgba(84,84,88,.55);
+  --field:rgba(118,118,128,.24); --seg-on:#636366;
+  --accent:#818cf8; --accent-soft:rgba(129,140,248,.18);
+  --test:#fb923c; --test-soft:rgba(251,146,60,.18);
+  --other:#2dd4bf; --other-soft:rgba(45,212,191,.16);
+  --danger:#f87171; --danger-soft:rgba(248,113,113,.13); --danger-line:rgba(248,113,113,.4); --warn:#fbbf24; --ok:#4ade80;
+  --shadow:none; --toast:#3a3a3c; color-scheme:dark;
+}}
+/* Dark chosen manually */
+:root[data-theme="dark"]{
+  --bg:#000000; --card:#1c1c1e; --text:#f2f2f7; --muted:#98989f; --line:rgba(84,84,88,.55);
+  --field:rgba(118,118,128,.24); --seg-on:#636366;
+  --accent:#818cf8; --accent-soft:rgba(129,140,248,.18);
+  --test:#fb923c; --test-soft:rgba(251,146,60,.18);
+  --other:#2dd4bf; --other-soft:rgba(45,212,191,.16);
+  --danger:#f87171; --danger-soft:rgba(248,113,113,.13); --danger-line:rgba(248,113,113,.4); --warn:#fbbf24; --ok:#4ade80;
+  --shadow:none; --toast:#3a3a3c; color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--text)}
+body{font:17px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
+  min-height:100vh;-webkit-text-size-adjust:100%}
+button{font:inherit;color:inherit;cursor:pointer}
+.wrap{max-width:640px;margin:0 auto;padding:0 16px calc(110px + env(safe-area-inset-bottom))}
+
+header{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;padding:20px 0 12px}
+h1{font-size:34px;font-weight:800;letter-spacing:-.025em;margin:0;line-height:1.1}
+.sub{color:var(--muted);font-size:15px;margin-top:4px}
+.sub b{color:var(--danger);font-weight:600}
+.icon-btn{width:36px;height:36px;border-radius:50%;border:0;background:var(--field);color:var(--accent);
+  display:grid;place-items:center;flex:none}
+.icon-btn svg{width:20px;height:20px}
+.head-btns{display:flex;gap:8px}
+.check.pending{border-color:var(--ok);background:var(--ok);color:#fff}
+#ask{background:transparent;padding:0 8px calc(8px + env(safe-area-inset-bottom))}
+.ask-box{background:var(--card);border-radius:14px;overflow:hidden;margin-bottom:8px;text-align:center}
+.ask-msg{padding:16px 16px 14px;font-size:14px;color:var(--muted);border-bottom:1px solid var(--line)}
+.ask-msg b{display:block;color:var(--text);font-size:15px;margin-bottom:3px;font-weight:600;overflow-wrap:anywhere}
+.ask-box button{display:block;width:100%;border:0;background:none;padding:16px;font-size:19px;color:var(--accent)}
+.ask-box button + button{border-top:1px solid var(--line)}
+.ask-box button.ok{color:var(--ok);font-weight:500}
+.ask-box button.danger{color:var(--danger)}
+.ask-cancel{display:block;width:100%;border:0;background:var(--card);border-radius:14px;padding:16px;font-size:19px;font-weight:600;color:var(--accent)}
+
+.seg{display:flex;background:var(--field);border-radius:10px;padding:2px;margin:4px 0 18px}
+.seg button{flex:1;border:0;background:transparent;padding:7px 4px;border-radius:8px;font-size:14px;font-weight:500;color:var(--text)}
+.seg button[aria-pressed="true"]{background:var(--seg-on);font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+
+#viewSeg{margin-bottom:12px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:0 -16px 18px;padding:2px 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chips button{flex:none;border:0;background:var(--field);border-radius:999px;padding:6px 14px;font-size:14px;font-weight:500}
+.chips button[aria-pressed="true"]{background:var(--text);color:var(--bg)}
+.status{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center}
+.status svg{width:16px;height:16px}
+.status.done{background:var(--ok);color:#fff}
+.status.missed{border:2px dashed var(--muted);color:var(--muted)}
+.row.hist .title{font-weight:500}
+.when .r.ok{color:var(--ok);font-weight:500}
+.when .r.late{color:var(--warn);font-weight:500}
+.clear-row{margin:4px 0 0}
+.clear-row button{text-align:center;display:block;color:var(--danger)}
+.field.kv{align-items:flex-start}
+.field.kv label{flex:none;width:auto;padding:13px 0}
+.field.kv .v{flex:1;min-width:0;text-align:right;padding:13px 0;font-size:16px;overflow-wrap:anywhere}
+.install{display:flex;gap:12px;align-items:flex-start;background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin:0 0 16px;font-size:15px}
+.install p{margin:0;flex:1}
+.install button{border:0;background:none;color:var(--muted);font-size:22px;line-height:1;padding:0 2px}
+
+.day{margin:0 0 22px}
+.day h2{font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin:0 0 7px 16px}
+.day h2 span{text-transform:none;letter-spacing:0;font-weight:400}
+.group{background:var(--card);border-radius:14px;overflow:hidden;box-shadow:var(--shadow)}
+.row{display:flex;align-items:center;gap:12px;padding:12px 14px 12px 12px;position:relative;
+  transition:opacity .25s, transform .25s}
+.row + .row::before{content:"";position:absolute;top:0;left:52px;right:0;height:1px;background:var(--line)}
+.row.leaving{opacity:0;transform:translateX(24px)}
+.check{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);background:none;
+  display:grid;place-items:center;padding:0;color:transparent}
+.check svg{width:16px;height:16px}
+.check:active,.row.leaving .check{border-color:var(--ok);background:var(--ok);color:#fff}
+.main{flex:1;min-width:0;border:0;background:none;text-align:left;padding:0;display:flex;align-items:center;gap:10px}
+.info{flex:1;min-width:0}
+.title{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.meta{display:flex;gap:6px;align-items:center;font-size:14px;color:var(--muted);margin-top:3px;min-width:0}
+.meta .course{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{flex:none;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;padding:2px 7px;border-radius:6px;
+  background:var(--accent-soft);color:var(--accent)}
+.pill.test{background:var(--test-soft);color:var(--test)}
+.pill.other{background:var(--other-soft);color:var(--other)}
+.title-line{display:flex;align-items:center;gap:7px;min-width:0}
+.title-line .title{min-width:0}
+.due-badge{flex:none;background:var(--danger);color:#fff;font-size:11px;font-weight:800;letter-spacing:.06em;padding:2px 7px;border-radius:6px}
+.day.overdue h2{color:var(--danger)}
+.day.overdue .group{background:var(--danger-soft);box-shadow:inset 0 0 0 1.5px var(--danger-line)}
+.row.overdue .title,.row.overdue .when .t,.row.overdue .course{color:var(--danger)}
+.row.overdue .check{border-color:var(--danger-line)}
+.row.overdue + .row.overdue::before{background:var(--danger-line)}
+.when .r.over{color:var(--danger);font-weight:700}
+.when{flex:none;text-align:right}
+.when .t{font-size:15px;font-variant-numeric:tabular-nums}
+.when .r{font-size:13px;color:var(--muted);margin-top:2px;font-variant-numeric:tabular-nums}
+.when .r.urgent{color:var(--danger);font-weight:600}
+.when .r.soon{color:var(--warn);font-weight:500}
+.note-dot{font-size:13px;color:var(--muted)}
+
+.empty{text-align:center;color:var(--muted);padding:70px 20px}
+.empty svg{width:56px;height:56px;color:var(--ok);opacity:.85}
+.empty h3{color:var(--text);font-size:20px;margin:12px 0 6px}
+.empty p{margin:0;font-size:15px}
+
+.fab{position:fixed;right:max(20px, calc(50% - 300px));bottom:calc(24px + env(safe-area-inset-bottom));
+  width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:#fff;
+  box-shadow:0 8px 22px rgba(79,70,229,.4);display:grid;place-items:center}
+.fab svg{width:28px;height:28px}
+.fab:active{transform:scale(.94)}
+
+/* Bottom sheets */
+dialog{border:0;padding:0;background:var(--bg);color:var(--text);width:100%;max-width:640px;
+  margin:auto auto 0;border-radius:16px 16px 0 0;max-height:92vh;
+  padding-bottom:env(safe-area-inset-bottom)}
+dialog::backdrop{background:rgba(0,0,0,.4)}
+dialog[open]{animation:up .28s cubic-bezier(.2,.8,.2,1)}
+@keyframes up{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;position:sticky;top:0;background:var(--bg);z-index:1}
+.sheet-head h3{margin:0;font-size:17px}
+.sheet-head button{border:0;background:none;color:var(--accent);font-size:17px;padding:4px 2px;min-width:60px;text-align:left}
+.sheet-head button.primary{font-weight:600;text-align:right}
+.sheet-head button:disabled{opacity:.35}
+.sheet-body{padding:4px 16px 24px;overflow-y:auto}
+.fields{background:var(--card);border-radius:12px;overflow:hidden;margin-bottom:18px}
+.field{display:flex;align-items:center;gap:10px;padding:0 14px;min-height:48px;position:relative}
+.field + .field::before{content:"";position:absolute;top:0;left:14px;right:0;height:1px;background:var(--line)}
+.field label{flex:none;width:64px;color:var(--muted);font-size:16px}
+.field input,.field textarea{flex:1;min-width:0;border:0;background:none;color:var(--text);font:inherit;font-size:17px;padding:13px 0;outline:none}
+.field textarea{resize:none;min-height:88px}
+.field.top{align-items:flex-start}
+.field.top label{padding-top:13px}
+.due-wrap{padding:10px 12px 12px}
+.due-wrap > label{display:block;color:var(--muted);font-size:14px;margin:0 2px 7px}
+.dt{display:flex;gap:8px}
+.dt-box{display:flex;align-items:center;background:var(--field);border-radius:10px;min-width:0;flex:1.45;
+  transition:box-shadow .15s}
+.dt-box.time{flex:1}
+.dt-box input{flex:1;min-width:0;border:0;background:none;color:var(--text);font:inherit;font-size:16px;
+  padding:11px 0 11px 11px;outline:none;-webkit-user-select:text;user-select:text}
+.dt-box button{flex:none;width:40px;height:44px;border:0;background:none;color:var(--accent);display:grid;place-items:center;padding:0}
+.dt-box button svg{width:20px;height:20px}
+.dt-box:focus-within,.dt-box.open{box-shadow:inset 0 0 0 1.5px var(--accent)}
+.dt-box.bad{box-shadow:inset 0 0 0 1.5px var(--danger)}
+.dt-hint{font-size:13px;color:var(--muted);margin:7px 2px 0;min-height:17px}
+.dt-hint.bad{color:var(--danger)}
+.dt-hint:empty{display:none}
+#timeQuick{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+#timeQuick button{padding:7px 2px;font-size:13.5px;white-space:nowrap}
+
+.picker{border-top:1px solid var(--line);padding:10px 12px 12px;animation:drop .18s ease-out}
+@keyframes drop{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.cal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.cal-head b{font-size:16px}
+.cal-head button{width:40px;height:36px;border:0;background:none;color:var(--accent);font-size:24px;line-height:1;border-radius:8px}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center}
+.cal-grid .wd{font-size:12px;font-weight:600;color:var(--muted);padding:4px 0}
+.cal-grid button{border:0;background:none;height:40px;border-radius:50%;font-size:16px;width:40px;justify-self:center;padding:0;
+  font-variant-numeric:tabular-nums}
+.cal-grid button.today{color:var(--accent);font-weight:700}
+.cal-grid button.sel{background:var(--accent);color:#fff;font-weight:700}
+.cal-grid button:disabled{color:var(--muted);opacity:.4}
+.quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.quick button{border:0;background:var(--field);border-radius:999px;padding:6px 12px;font-size:14px;font-weight:500}
+.quick button.sel{background:var(--accent);color:#fff}
+.time-list{max-height:216px;overflow-y:auto;margin-top:8px;border-radius:10px;background:var(--field);-webkit-overflow-scrolling:touch}
+.time-list button{display:block;width:100%;border:0;background:none;text-align:left;padding:11px 14px;font-size:16px;
+  font-variant-numeric:tabular-nums}
+.time-list button + button{border-top:1px solid var(--line)}
+.time-list button.sel{color:var(--accent);font-weight:700}
+input::placeholder,textarea::placeholder{color:var(--muted);opacity:.7}
+.sheet-body .seg{margin:0 0 18px}
+.error{color:var(--danger);font-size:14px;margin:-10px 4px 14px;min-height:0}
+.danger-btn,.plain-btn{width:100%;border:0;background:var(--card);border-radius:12px;padding:14px;font-size:17px}
+.danger-btn{color:var(--danger)}
+.plain-btn{color:var(--accent);text-align:left;display:flex;justify-content:space-between;align-items:center}
+.stack{display:grid;gap:10px;margin-bottom:18px}
+.help{font-size:14px;color:var(--muted);margin:0 4px 18px}
+
+.toast{position:fixed;left:50%;bottom:calc(100px + env(safe-area-inset-bottom));transform:translate(-50%,20px);
+  background:var(--toast);color:#fff;border-radius:12px;padding:10px 10px 10px 16px;display:flex;gap:14px;align-items:center;
+  font-size:15px;opacity:0;pointer-events:none;transition:.25s;max-width:calc(100% - 32px);box-shadow:0 8px 24px rgba(0,0,0,.25)}
+
+.toast.show{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+.toast button{border:0;background:none;color:#a5b4fc;font-weight:600;padding:4px 6px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>WorkDueSoon</h1>
+      <div class="sub" id="sub">&nbsp;</div>
+    </div>
+    <div class="head-btns">
+    <button class="icon-btn" id="themeBtn" aria-label="Switch light or dark mode">
+      <svg id="themeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></svg>
+    </button>
+    <button class="icon-btn" id="menuBtn" aria-label="Settings and backup">
+      <svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+    </button>
+    </div>
+  </header>
+
+  <div class="install" id="installHint" hidden>
+    <p>To use WorkDueSoon offline like an app: tap <b>Share</b> <span aria-hidden="true">⬆︎</span> then <b>Add to Home Screen</b>.</p>
+    <button id="installClose" aria-label="Dismiss">×</button>
+  </div>
+
+  <div class="seg" id="viewSeg" role="group" aria-label="View">
+    <button data-v="upcoming" aria-pressed="true">Upcoming</button>
+    <button data-v="history" aria-pressed="false">History</button>
+  </div>
+
+  <div class="chips" id="filter" role="group" aria-label="Filter">
+    <button data-f="all" aria-pressed="true">All</button>
+    <button data-f="assignment" aria-pressed="false">Assignments</button>
+    <button data-f="test" aria-pressed="false">Tests</button>
+    <button data-f="other" aria-pressed="false">Other</button>
+  </div>
+
+  <main id="list"></main>
+
+  <div class="empty" id="empty" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M7.5 12.5l3 3 6-6.5"/></svg>
+    <h3 id="emptyTitle">Nothing due</h3>
+    <p id="emptyText">Tap + to add an assignment or test.</p>
+  </div>
+</div>
+
+<button class="fab" id="addBtn" aria-label="Add activity">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+</button>
+
+<!-- Add / edit sheet -->
+<dialog id="editor">
+  <form id="form" novalidate>
+    <div class="sheet-head">
+      <button type="button" id="cancelBtn">Cancel</button>
+      <h3 id="editorTitle">New Activity</h3>
+      <button type="submit" class="primary" id="saveBtn">Save</button>
+    </div>
+    <div class="sheet-body">
+      <div class="fields">
+        <div class="field"><label for="fTitle">Title</label><input id="fTitle" placeholder="Essay draft" autocomplete="off" enterkeyhint="done"></div>
+        <div class="field"><label for="fCourse">Course</label><input id="fCourse" placeholder="BIO 101" list="courses" autocomplete="off" enterkeyhint="done"></div>
+      </div>
+      <datalist id="courses"></datalist>
+
+      <div class="seg" id="kindSeg" role="group" aria-label="Type">
+        <button type="button" data-k="assignment" aria-pressed="true">Assignment</button>
+        <button type="button" data-k="test" aria-pressed="false">Test</button>
+        <button type="button" data-k="other" aria-pressed="false">Other</button>
+      </div>
+
+      <div class="fields">
+        <div class="due-wrap">
+          <label for="fDate">Due</label>
+          <div class="dt">
+            <div class="dt-box" id="dateBox">
+              <input id="fDate" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="next" aria-label="Due date">
+              <button type="button" id="dateBtn" aria-label="Choose date from calendar" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/></svg>
+              </button>
+            </div>
+            <div class="dt-box time" id="timeBox">
+              <input id="fTime" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" enterkeyhint="done" aria-label="Due time">
+              <button type="button" id="timeBtn" aria-label="Choose time from list" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>
+              </button>
+            </div>
+          </div>
+          <div class="dt-hint" id="dtHint"></div>
+        </div>
+        <div class="picker" id="calPanel" hidden>
+          <div class="cal-head">
+            <button type="button" id="calPrev" aria-label="Previous month">&#8249;</button>
+            <b id="calTitle"></b>
+            <button type="button" id="calNext" aria-label="Next month">&#8250;</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="quick" id="calQuick">
+            <button type="button" data-q="0">Today</button>
+            <button type="button" data-q="1">Tomorrow</button>
+            <button type="button" data-q="7">In a week</button>
+          </div>
+        </div>
+        <div class="picker" id="timePanel" hidden>
+          <div class="quick" id="timeQuick" style="margin-top:0"></div>
+          <div class="time-list" id="timeList"></div>
+        </div>
+      </div>
+      <div class="error" id="formError" hidden></div>
+
+      <div class="fields">
+        <div class="field top"><label for="fNotes">Notes</label><textarea id="fNotes" placeholder="Optional"></textarea></div>
+      </div>
+
+      <div class="stack" id="editActions" hidden>
+        <button type="button" class="plain-btn" id="doneBtn" style="color:var(--ok)">Mark as done</button>
+        <button type="button" class="danger-btn" id="deleteBtn">Delete</button>
+      </div>
+    </div>
+  </form>
+</dialog>
+
+<!-- History detail sheet -->
+<dialog id="detail">
+  <div class="sheet-head">
+    <span style="min-width:60px"></span>
+    <h3>Details</h3>
+    <button type="button" class="primary" id="detailClose">Done</button>
+  </div>
+  <div class="sheet-body">
+    <div class="fields" id="detailInfo"></div>
+    <div class="fields" id="detailNotesBox"><div class="field top"><label>Notes</label><div class="v" id="detailNotes" style="text-align:left;flex:1;white-space:pre-wrap;-webkit-user-select:text;user-select:text"></div></div></div>
+    <div class="stack">
+      <button type="button" class="plain-btn" id="restoreBtn">Move back to Upcoming</button>
+      <button type="button" class="danger-btn" id="histDeleteBtn">Delete from History</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- Backup sheet -->
+<dialog id="menu">
+  <div class="sheet-head">
+    <span style="min-width:60px"></span>
+    <h3>Settings</h3>
+    <button type="button" class="primary" id="menuClose">Done</button>
+  </div>
+  <div class="sheet-body">
+    <p class="help" style="margin-bottom:8px">Appearance</p>
+    <div class="seg" id="themeSeg" role="group" aria-label="Appearance">
+      <button type="button" data-t="auto" aria-pressed="true">Automatic</button>
+      <button type="button" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" data-t="dark" aria-pressed="false">Dark</button>
+    </div>
+    <p class="help" style="margin-bottom:8px">Backup</p>
+    <p class="help">Everything is stored on this device only and works without internet. Save a backup now and then so you don't lose your list if you delete the app or clear Safari data.</p>
+    <div class="stack">
+      <button class="plain-btn" id="exportBtn">Save backup file <span>↗︎</span></button>
+      <button class="plain-btn" id="importBtn">Restore from backup <span>↙︎</span></button>
+    </div>
+    <input type="file" id="importFile" accept="application/json,.json" hidden>
+    <p class="help" id="storeInfo"></p>
+  </div>
+</dialog>
+
+<!-- Confirmation sheet -->
+<dialog id="ask">
+  <div class="ask-box">
+    <div class="ask-msg" id="askMsg"></div>
+    <div id="askActions"></div>
+  </div>
+  <button type="button" class="ask-cancel" id="askCancel">Cancel</button>
+</dialog>
+
+<div class="toast" id="toast" role="status"><span id="toastMsg"></span><button id="toastUndo" hidden>Undo</button></div>
+
+<script>
+(() => {
+  const KEY = 'duesoon.v1';
+  const KINDS = { assignment: 'Assignment', test: 'Test', other: 'Other' };
+  const $ = id => document.getElementById(id);
+
+  // ---------- storage ----------
+  function load() {
+    try {
+      const d = JSON.parse(localStorage.getItem(KEY) || '[]');
+      return Array.isArray(d) ? d.filter(valid) : [];
+    } catch { return []; }
+  }
+  function valid(i) {
+    return i && typeof i.id === 'string' && typeof i.title === 'string' && Number.isFinite(i.due);
+  }
+  function persist() {
+    try { localStorage.setItem(KEY, JSON.stringify(items)); }
+    catch { toast('Couldn’t save — storage is full or blocked'); }
+  }
+  const uid = () => (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+
+  let items = load();
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+  let filter = 'all';
+  let view = 'upcoming';
+  let editingId = null;
+  let restoring = false;
+  let originalDue = null;
+  let detailId = null;
+  let formKind = 'assignment';
+  let undo = null;
+
+  // ---------- formatting ----------
+  const pad = n => String(n).padStart(2, '0');
+  // ---------- date & time typing ----------
+  const MONTHS = ['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'];
+  const WEEKDAYS = ['sun','mon','tue','wed','thu','fri','sat'];
+  const DATE_ORDER = (() => {
+    try {
+      return new Intl.DateTimeFormat(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' })
+        .formatToParts(new Date(2026, 11, 25)).map(p => p.type[0]).filter(c => 'dmy'.includes(c)).join('');
+    } catch { return 'mdy'; }
+  })();
+  const MONTH_FIRST = DATE_ORDER.indexOf('m') < DATE_ORDER.indexOf('d');
+  const DATE_LOCALE = MONTH_FIRST ? 'en-US' : 'en-GB';
+  const HOUR12 = (() => { try { return new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions().hour12 !== false; } catch { return true; } })();
+  const WEEK_START = MONTH_FIRST ? 0 : 1;
+
+  const fmtDate = d => d.toLocaleDateString(DATE_LOCALE, { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' });
+  const fmtTime = mins => new Date(2000, 0, 1, Math.floor(mins / 60), mins % 60)
+    .toLocaleTimeString(HOUR12 ? 'en-US' : 'en-GB', HOUR12 ? { hour: 'numeric', minute: '2-digit', hour12: true } : { hour: '2-digit', minute: '2-digit', hour12: false });
+  const todayMidnight = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+  const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
+  const sameDay = (a, b) => a && b && a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+
+  function makeDate(y, m, d) {
+    if (y < 100) y += 2000;
+    const x = new Date(y, m, d);
+    return (x.getFullYear() === y && x.getMonth() === m && x.getDate() === d) ? x : null;
+  }
+  // Without a year: this year, or next year if that date has already gone by.
+  function guessYear(m, d) {
+    const t = todayMidnight();
+    const x = makeDate(t.getFullYear(), m, d);
+    if (!x) return makeDate(t.getFullYear() + 1, m, d);
+    return x < addDays(t, -30) ? makeDate(t.getFullYear() + 1, m, d) : x;
+  }
+
+  // Understands: 3/10, 3/10/26, 2026-10-03, Oct 3, 3 Oct 2026, Wed, Oct 3, 2026, today, tomorrow, fri, next fri
+  function parseDate(str) {
+    const s = str.trim().toLowerCase();
+    if (!s) return null;
+    const t = todayMidnight();
+    if (/^(today|tod|now)$/.test(s)) return t;
+    if (/^(tomorrow|tmr|tmrw|tom|tomo)$/.test(s)) return addDays(t, 1);
+    let m = s.match(/^in\s+(\d+)\s*(d|day|days|w|wk|week|weeks)$/);
+    if (m) return addDays(t, +m[1] * (m[2][0] === 'w' ? 7 : 1));
+
+    const tokens = s.replace(/(\d)(st|nd|rd|th)\b/g, '$1').split(/[\s,]+/).filter(Boolean);
+    const words = tokens.filter(x => /^[a-z]+\.?$/.test(x));
+    const monthTok = words.find(w => MONTHS.includes(w.slice(0, 3)) && !WEEKDAYS.includes(w.slice(0, 3)));
+    const wdTok = words.find(w => WEEKDAYS.includes(w.slice(0, 3)));
+
+    if (!monthTok) {
+      // Only a weekday ("fri", "next friday"): the next one after today.
+      if (wdTok && tokens.every(x => x === 'next' || x === 'this' || WEEKDAYS.includes(x.slice(0, 3)))) {
+        const target = WEEKDAYS.indexOf(wdTok.slice(0, 3));
+        let diff = (target - t.getDay() + 7) % 7; if (diff === 0) diff = 7;
+        return addDays(t, diff);
+      }
+      // Numbers only: 3/10, 3.10.2026, 2026-10-03
+      const nums = s.replace(/^[a-z]+,?\s*/, '').split(/[\/.\-\s]+/).filter(Boolean);
+      if (!nums.every(n => /^\d+$/.test(n)) || nums.length < 2 || nums.length > 3) return null;
+      const n = nums.map(Number);
+      if (nums[0].length === 4) return nums.length === 3 ? makeDate(n[0], n[1] - 1, n[2]) : null;
+      let [a, b] = n;
+      let mon = MONTH_FIRST ? a : b, day = MONTH_FIRST ? b : a;
+      if (mon > 12 && day <= 12) [mon, day] = [day, mon];   // 25/10 typed in a month-first locale
+      return nums.length === 3 ? makeDate(n[2], mon - 1, day) : guessYear(mon - 1, day);
+    }
+    // Month name: "oct 3", "3 october 2026", "wed, oct 3, 2026"
+    const mon = MONTHS.indexOf(monthTok.slice(0, 3));
+    const nums = tokens.filter(x => /^\d+$/.test(x)).map(Number);
+    const day = nums.find(x => x >= 1 && x <= 31);
+    if (day == null) return null;
+    const year = nums.find(x => x !== day && (x >= 1000 || (x >= 24 && x < 100)));
+    return year != null ? makeDate(year, mon, day) : guessYear(mon, day);
+  }
+
+  // Understands: 9, 9pm, 9:30, 930pm, 21:30, 9.30 am, noon, midnight
+  function parseTime(str) {
+    const s = str.trim().toLowerCase().replace(/\s+/g, '').replace(/\./g, ':').replace(/::+/g, ':');
+    if (!s) return null;
+    if (s === 'noon' || s === 'midday') return 720;
+    if (s === 'midnight') return 0;
+    if (s === 'eod' || s === 'endofday') return 1439;
+    const m = s.match(/^(\d{1,2})(?::?(\d{2}))?:?(a|am|p|pm|a:m:|p:m:)?$/);
+    if (!m) return null;
+    let h = +m[1]; const min = m[2] ? +m[2] : 0; const ap = m[3];
+    if (min > 59) return null;
+    if (ap) {
+      if (h < 1 || h > 12) return null;
+      if (ap[0] === 'p' && h !== 12) h += 12;
+      if (ap[0] === 'a' && h === 12) h = 0;
+    } else if (h > 23) return null;
+    return h * 60 + min;
+  }
+
+  const toLocalInput = t => { const d = new Date(t); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
+  const fromLocalInput = s => { if (!s) return NaN; const [date, time = '00:00'] = s.split('T'); const [y, m, d] = date.split('-').map(Number); const [hh, mm] = time.split(':').map(Number); return new Date(y, m - 1, d, hh, mm).getTime(); };
+  const dayKey = t => { const d = new Date(t); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; };
+  const startOfDay = t => { const d = new Date(t); d.setHours(0,0,0,0); return d.getTime(); };
+  const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+
+  function dayLabel(t, now) {
+    const diff = Math.round((startOfDay(t) - startOfDay(now)) / 864e5);
+    const date = new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric' });
+    if (diff === 0) return ['Today', date];
+    if (diff === 1) return ['Tomorrow', date];
+    if (diff < 7) return [new Date(t).toLocaleDateString([], { weekday: 'long' }), date];
+    return [new Date(t).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' }), ''];
+  }
+  function overdueBy(ms) {
+    const mins = Math.max(1, Math.floor(ms / 6e4));
+    if (mins < 60) return `${mins} min`;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    if (h < 24) return m && h < 10 ? `${h}h ${m}m` : `${h}h`;
+    const d = Math.floor(h / 24), rh = h % 24;
+    if (d < 3) return rh ? `${d}d ${rh}h` : `${d}d`;
+    if (d < 14) return `${d} days`;
+    return `${Math.floor(d / 7)} weeks`;
+  }
+  function overdueWhen(t, now) {
+    const diff = Math.round((startOfDay(now) - startOfDay(t)) / 864e5);
+    if (diff === 0) return timeStr(t);
+    if (diff < 7) return `${new Date(t).toLocaleDateString([], { weekday: 'short' })} ${timeStr(t)}`;
+    return new Date(t).toLocaleDateString([], { month: 'short', day: 'numeric' });
+  }
+  function relative(ms) {
+    const mins = Math.max(1, Math.round(ms / 6e4));
+    if (mins < 60) return `in ${mins} min`;
+    const h = Math.floor(mins / 60), m = mins % 60;
+    if (h < 24) return m && h < 10 ? `in ${h}h ${m}m` : `in ${h}h`;
+    const d = Math.floor(h / 24), rh = h % 24;
+    if (d < 3) return rh ? `in ${d}d ${rh}h` : `in ${d}d`;
+    if (d < 14) return `in ${d} days`;
+    const w = Math.round(d / 7);
+    return `in ${w} weeks`;
+  }
+  const timeStr = t => new Date(t).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+  // ---------- render ----------
+  const ICON_CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+
+  const ICON_DONE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+  const ICON_MISSED = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 7v5l3 2"/></svg>';
+  const NOUNS = { assignment: 'assignments', test: 'tests', other: 'other activities' };
+
+  function pastDayLabel(t, now) {
+    const diff = Math.round((startOfDay(now) - startOfDay(t)) / 864e5);
+    const d = new Date(t);
+    const date = d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+    if (diff === 0) return ['Today', date];
+    if (diff === 1) return ['Yesterday', date];
+    if (diff < 7) return [d.toLocaleDateString([], { weekday: 'long' }), date];
+    const sameYear = d.getFullYear() === new Date(now).getFullYear();
+    return [d.toLocaleDateString([], sameYear ? { weekday: 'short', month: 'short', day: 'numeric' } : { month: 'short', day: 'numeric', year: 'numeric' }), ''];
+  }
+  const fullDate = t => new Date(t).toLocaleString([], { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+
+  function render() {
+    $('addBtn').hidden = view === 'history';
+    if (view === 'history') renderHistory(Date.now()); else renderUpcoming(Date.now());
+  }
+
+  function renderHistory(now) {
+    const past = items.filter(i => i.doneAt)
+      .map(i => ({ i, t: i.doneAt }))
+      .sort((a, b) => b.t - a.t);
+    const shown = past.filter(x => filter === 'all' || x.i.kind === filter);
+    const done = past.filter(x => x.i.doneAt);
+    const onTime = done.filter(x => x.i.doneAt <= x.i.due).length;
+    const late = done.length - onTime;
+    $('sub').textContent = past.length
+      ? `${done.length} completed \u00b7 ${onTime} on time` + (late ? ` \u00b7 ${late} late` : '')
+      : 'No history yet';
+
+    const list = $('list');
+    if (!shown.length) {
+      list.innerHTML = '';
+      $('empty').hidden = false;
+      $('emptyTitle').textContent = filter === 'all' ? 'No history yet' : `No ${NOUNS[filter]} in history`;
+      $('emptyText').textContent = 'Items you mark as done show up here.';
+      return;
+    }
+    $('empty').hidden = true;
+
+    const groups = [];
+    for (const x of shown) {
+      const k = dayKey(x.t);
+      if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, t: x.t, items: [] });
+      groups[groups.length - 1].items.push(x);
+    }
+    list.innerHTML = groups.map(g => {
+      const [label, sub] = pastDayLabel(g.t, now);
+      return `<section class="day"><h2>${esc(label)}${sub ? ` <span>\u00b7 ${esc(sub)}</span>` : ''}</h2><div class="group">` +
+        g.items.map(({ i: it }) => {
+          const kind = KINDS[it.kind] ? it.kind : 'other';
+          const isDone = !!it.doneAt;
+          const status = isDone ? (it.doneAt <= it.due ? ['ok', 'On time'] : ['late', 'Late']) : ['', 'Not checked off'];
+          const time = isDone ? `Done ${timeStr(it.doneAt)}` : `Due ${timeStr(it.due)}`;
+          return `<div class="row hist" data-id="${esc(it.id)}">
+            <span class="status ${isDone ? 'done' : 'missed'}" aria-label="${isDone ? 'Completed' : 'Past due'}">${isDone ? ICON_DONE : ICON_MISSED}</span>
+            <button class="main" data-act="detail">
+              <div class="info">
+                <div class="title">${esc(it.title)}</div>
+                <div class="meta"><span class="pill ${kind}">${KINDS[kind]}</span>${it.course ? `<span class="course">${esc(it.course)}</span>` : ''}</div>
+              </div>
+              <div class="when"><div class="t">${time}</div><div class="r ${status[0]}">${status[1]}</div></div>
+            </button>
+          </div>`;
+        }).join('') + '</div></section>';
+    }).join('') + '<div class="clear-row"><button class="plain-btn" data-act="clear">Clear History</button></div>';
+  }
+
+  function renderUpcoming(now) {
+    const active = items.filter(i => !i.doneAt).sort((a, b) => a.due - b.due);
+    const shown = active.filter(i => filter === 'all' || i.kind === filter);
+    const overdueN = active.filter(i => i.due <= now).length;
+    const upcomingN = active.length - overdueN;
+    const within24 = active.filter(i => i.due > now && i.due - now < 864e5).length;
+
+    const parts = [];
+    if (overdueN) parts.push(`<b>${overdueN} overdue</b>`);
+    if (upcomingN) parts.push(`${upcomingN} upcoming`);
+    if (within24) parts.push(`${within24} due within 24h`);
+    $('sub').innerHTML = parts.length ? parts.join(' \u00b7 ') : 'All caught up';
+
+    const list = $('list');
+    if (!shown.length) {
+      list.innerHTML = '';
+      $('empty').hidden = false;
+      $('emptyTitle').textContent = filter === 'all' ? 'Nothing due' : `No upcoming ${NOUNS[filter]}`;
+      $('emptyText').textContent = 'Tap + to add an assignment or test.';
+      return;
+    }
+    $('empty').hidden = true;
+
+    const groups = [];
+    for (const it of shown) {
+      const k = it.due <= now ? 'overdue' : dayKey(it.due);
+      if (!groups.length || groups[groups.length - 1].k !== k) groups.push({ k, t: it.due, items: [] });
+      groups[groups.length - 1].items.push(it);
+    }
+
+    list.innerHTML = groups.map(g => {
+      const isOver = g.k === 'overdue';
+      const [label, sub] = isOver ? ['Overdue', ''] : dayLabel(g.t, now);
+      return `<section class="day${isOver ? ' overdue' : ''}"><h2>${esc(label)}${sub ? ` <span>· ${esc(sub)}</span>` : ''}</h2><div class="group">` +
+        g.items.map(it => {
+          const left = it.due - now;
+          const over = left <= 0;
+          const cls = over ? 'over' : left < 864e5 ? 'urgent' : left < 3 * 864e5 ? 'soon' : '';
+          const kind = KINDS[it.kind] ? it.kind : 'other';
+          const whenTop = over ? overdueWhen(it.due, now) : timeStr(it.due);
+          const whenBottom = over ? `Overdue by ${overdueBy(-left)}` : relative(left);
+          return `<div class="row${over ? ' overdue' : ''}" data-id="${esc(it.id)}">
+            <button class="check" data-act="done" aria-label="Mark ${esc(it.title)} as done">${ICON_CHECK}</button>
+            <button class="main" data-act="edit">
+              <div class="info">
+                <div class="title-line"><div class="title">${esc(it.title)}</div>${over ? '<span class="due-badge">DUE</span>' : ''}</div>
+                <div class="meta"><span class="pill ${kind}">${KINDS[kind]}</span>${it.course ? `<span class="course">${esc(it.course)}</span>` : ''}${it.notes ? '<span class="note-dot" aria-label="has notes">✎</span>' : ''}</div>
+              </div>
+              <div class="when"><div class="t">${whenTop}</div><div class="r ${cls}">${whenBottom}</div></div>
+            </button>
+          </div>`;
+        }).join('') + '</div></section>';
+    }).join('');
+  }
+
+  // ---------- confirmation sheet ----------
+  const ask = $('ask');
+  let askDone = null;
+  function confirmSheet(title, message, actions, onClose) {
+    $('askMsg').innerHTML = `<b>${esc(title)}</b>${esc(message)}`;
+    $('askActions').innerHTML = actions.map((a, n) => `<button type="button" class="${a.style || ''}" data-n="${n}">${esc(a.label)}</button>`).join('');
+    askDone = { actions, onClose };
+    ask.showModal();
+  }
+  function closeAsk(n) {
+    const d = askDone; askDone = null;
+    ask.close();
+    if (!d) return;
+    if (d.onClose) d.onClose();
+    if (n != null && d.actions[n]) d.actions[n].run();
+  }
+  $('askActions').addEventListener('click', e => { const b = e.target.closest('button'); if (b) closeAsk(+b.dataset.n); });
+  $('askCancel').addEventListener('click', () => closeAsk(null));
+  ask.addEventListener('click', e => { if (e.target === ask) closeAsk(null); });
+  ask.addEventListener('cancel', e => { e.preventDefault(); closeAsk(null); });
+
+  function confirmDelete(id, before) {
+    const it = items.find(i => i.id === id);
+    if (!it) return;
+    confirmSheet(`Delete \u201c${it.title}\u201d?`, 'It will be removed completely, including from History.',
+      [{ label: 'Delete', style: 'danger', run: () => { if (before) before(); removeItem(id, 'Deleted'); } }]);
+  }
+
+  // ---------- list interactions ----------
+  $('list').addEventListener('click', e => {
+    const btn = e.target.closest('[data-act]');
+    if (!btn) return;
+    const act = btn.dataset.act;
+    if (act === 'clear') {
+      const now = Date.now();
+      const n = items.filter(i => i.doneAt).length;
+      if (!n) return;
+      confirmSheet('Clear History?', `All ${n} item${n === 1 ? '' : 's'} in History will be deleted. This can\u2019t be undone.`,
+        [{ label: 'Clear History', style: 'danger', run: () => {
+          const t = Date.now();
+          items = items.filter(i => !i.doneAt);
+          persist(); render(); toast('History cleared');
+        } }]);
+      return;
+    }
+    const row = btn.closest('.row');
+    const id = row.dataset.id;
+    if (act === 'edit') openEditor(id);
+    else if (act === 'detail') openDetail(id);
+    else if (act === 'done') {
+      const it = items.find(i => i.id === id);
+      if (!it) return;
+      btn.classList.add('pending');
+      confirmSheet(`\u201c${it.title}\u201d`, 'Is this finished? Marking it done moves it to History.',
+        [
+          { label: 'Mark as done', style: 'ok', run: () => { row.classList.add('leaving'); setTimeout(() => markDone(id), 260); } },
+          { label: 'Delete', style: 'danger', run: () => confirmDelete(id) }
+        ],
+        () => btn.classList.remove('pending'));
+    }
+  });
+
+  function markDone(id) {
+    const it = items.find(i => i.id === id);
+    if (!it) return;
+    it.doneAt = Date.now();
+    persist(); render();
+    undo = () => { delete it.doneAt; persist(); render(); };
+    toast('Done \u2014 moved to History', true);
+  }
+
+  function removeItem(id, msg) {
+    const idx = items.findIndex(i => i.id === id);
+    if (idx < 0) return;
+    const [removed] = items.splice(idx, 1);
+    persist(); render();
+    undo = () => { items.push(removed); persist(); render(); };
+    toast(msg, true);
+  }
+
+  // ---------- view ----------
+  $('viewSeg').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    view = b.dataset.v;
+    for (const x of $('viewSeg').children) x.setAttribute('aria-pressed', x === b);
+    render();
+    window.scrollTo(0, 0);
+  });
+
+  // ---------- filter ----------
+  $('filter').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    filter = b.dataset.f;
+    for (const x of $('filter').children) x.setAttribute('aria-pressed', x === b);
+    render();
+  });
+
+  // ---------- editor ----------
+  const editor = $('editor');
+  function setKind(k) {
+    formKind = k;
+    for (const x of $('kindSeg').children) x.setAttribute('aria-pressed', x.dataset.k === k);
+  }
+  $('kindSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setKind(b.dataset.k); });
+
+  const dateBox = $('dateBox'), timeBox = $('timeBox'), fDate = $('fDate'), fTime = $('fTime');
+  let selDay = null, selMin = null, calMonth = null;
+  fDate.placeholder = MONTH_FIRST ? 'MM/DD or Oct 3' : 'DD/MM or 3 Oct';
+  fTime.placeholder = HOUR12 ? '11:59 PM' : '23:59';
+
+  function setHint(msg, bad) { $('dtHint').textContent = msg || ''; $('dtHint').classList.toggle('bad', !!bad); }
+  function allowPast() { return originalDue != null && originalDue <= Date.now(); }
+
+  function setDue(ms) {
+    const d = new Date(ms);
+    selDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    selMin = d.getHours() * 60 + d.getMinutes();
+    fDate.value = fmtDate(selDay); fTime.value = fmtTime(selMin);
+    dateBox.classList.remove('bad'); timeBox.classList.remove('bad'); setHint('');
+  }
+  function commitDate(quiet) {
+    const d = parseDate(fDate.value);
+    if (d) { selDay = d; fDate.value = fmtDate(d); dateBox.classList.remove('bad'); if (!timeBox.classList.contains('bad')) setHint(''); }
+    else if (!quiet) { dateBox.classList.add('bad'); setHint(MONTH_FIRST ? 'Couldn\u2019t read that date. Try 10/3, Oct 3 or tomorrow.' : 'Couldn\u2019t read that date. Try 3/10, 3 Oct or tomorrow.', true); }
+    return d;
+  }
+  function commitTime(quiet) {
+    const t = parseTime(fTime.value);
+    if (t != null) { selMin = t; fTime.value = fmtTime(t); timeBox.classList.remove('bad'); if (!dateBox.classList.contains('bad')) setHint(''); }
+    else if (!quiet) { timeBox.classList.add('bad'); setHint(HOUR12 ? 'Couldn\u2019t read that time. Try 9pm, 9:30 am or 21:30.' : 'Couldn\u2019t read that time. Try 21:30 or 9pm.', true); }
+    return t;
+  }
+
+  fDate.addEventListener('input', () => { const d = parseDate(fDate.value); if (d) { selDay = d; dateBox.classList.remove('bad'); if (!$('calPanel').hidden) { calMonth = new Date(d.getFullYear(), d.getMonth(), 1); drawCal(); } } });
+  fTime.addEventListener('input', () => { const t = parseTime(fTime.value); if (t != null) { selMin = t; timeBox.classList.remove('bad'); if (!$('timePanel').hidden) drawTimes(false); } });
+  fDate.addEventListener('focus', () => { closePickers(); setTimeout(() => fDate.select(), 0); });
+  fTime.addEventListener('focus', () => { closePickers(); setTimeout(() => fTime.select(), 0); });
+  fDate.addEventListener('blur', () => { if (fDate.value.trim()) commitDate(); });
+  fTime.addEventListener('blur', () => { if (fTime.value.trim()) commitTime(); });
+  fDate.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (commitDate()) fTime.focus(); } });
+  fTime.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); if (commitTime() != null) fTime.blur(); } });
+
+  function closePickers() {
+    $('calPanel').hidden = true; $('timePanel').hidden = true;
+    dateBox.classList.remove('open'); timeBox.classList.remove('open');
+    $('dateBtn').setAttribute('aria-expanded', 'false'); $('timeBtn').setAttribute('aria-expanded', 'false');
+  }
+  $('dateBtn').addEventListener('click', () => {
+    const wasOpen = !$('calPanel').hidden;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    closePickers();
+    if (wasOpen) return;
+    commitDate(true);
+    const base = selDay || todayMidnight();
+    calMonth = new Date(base.getFullYear(), base.getMonth(), 1);
+    drawCal();
+    $('calPanel').hidden = false; dateBox.classList.add('open'); $('dateBtn').setAttribute('aria-expanded', 'true');
+  });
+  $('timeBtn').addEventListener('click', () => {
+    const wasOpen = !$('timePanel').hidden;
+    if (document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    closePickers();
+    if (wasOpen) return;
+    commitTime(true);
+    $('timePanel').hidden = false; timeBox.classList.add('open'); $('timeBtn').setAttribute('aria-expanded', 'true');
+    drawTimes(true);
+  });
+
+  function drawCal() {
+    const t = todayMidnight();
+    $('calTitle').textContent = calMonth.toLocaleDateString(DATE_LOCALE, { month: 'long', year: 'numeric' });
+    const first = new Date(calMonth);
+    const lead = (first.getDay() - WEEK_START + 7) % 7;
+    const days = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+    const names = [];
+    for (let i = 0; i < 7; i++) names.push(new Date(2026, 1, 1 + ((WEEK_START + i) % 7)).toLocaleDateString(DATE_LOCALE, { weekday: 'narrow' }));
+    let html = names.map(n => `<div class="wd">${n}</div>`).join('') + '<span></span>'.repeat(lead);
+    const past = allowPast() ? null : t;
+    for (let d = 1; d <= days; d++) {
+      const date = new Date(first.getFullYear(), first.getMonth(), d);
+      const cls = [sameDay(date, t) ? 'today' : '', sameDay(date, selDay) ? 'sel' : ''].join(' ').trim();
+      html += `<button type="button" data-d="${d}" class="${cls}"${past && date < past ? ' disabled' : ''} aria-label="${date.toDateString()}">${d}</button>`;
+    }
+    $('calGrid').innerHTML = html;
+    const prevEnd = new Date(first.getFullYear(), first.getMonth(), 0);
+    $('calPrev').disabled = !allowPast() && prevEnd < t;
+    for (const b of $('calQuick').children) b.classList.toggle('sel', sameDay(selDay, addDays(t, +b.dataset.q)));
+  }
+  function pickDay(d) {
+    selDay = d; fDate.value = fmtDate(d); dateBox.classList.remove('bad');
+    if (!timeBox.classList.contains('bad')) setHint('');
+    closePickers();
+    if (selMin == null) $('timeBtn').click();
+  }
+  $('calGrid').addEventListener('click', e => {
+    const b = e.target.closest('button[data-d]'); if (!b || b.disabled) return;
+    pickDay(new Date(calMonth.getFullYear(), calMonth.getMonth(), +b.dataset.d));
+  });
+  $('calPrev').addEventListener('click', () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() - 1, 1); drawCal(); });
+  $('calNext').addEventListener('click', () => { calMonth = new Date(calMonth.getFullYear(), calMonth.getMonth() + 1, 1); drawCal(); });
+  $('calQuick').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pickDay(addDays(todayMidnight(), +b.dataset.q)); });
+
+  const QUICK_TIMES = [540, 720, 1020, 1439];   // 9:00, 12:00, 17:00, 23:59
+  function drawTimes(scroll) {
+    $('timeQuick').innerHTML = QUICK_TIMES.map(m => `<button type="button" data-m="${m}" class="${m === selMin ? 'sel' : ''}">${fmtTime(m)}</button>`).join('');
+    let html = '';
+    for (let m = 0; m < 1440; m += 15) html += `<button type="button" data-m="${m}" class="${m === selMin ? 'sel' : ''}">${fmtTime(m)}</button>`;
+    $('timeList').innerHTML = html;
+    if (scroll) {
+      const target = selMin != null ? Math.floor(selMin / 15) : 36;
+      const el = $('timeList').children[Math.max(0, target - 1)];
+      if (el) $('timeList').scrollTop = el.offsetTop - $('timeList').offsetTop;
+    }
+  }
+  function pickTime(m) {
+    selMin = m; fTime.value = fmtTime(m); timeBox.classList.remove('bad');
+    if (!dateBox.classList.contains('bad')) setHint('');
+    closePickers();
+  }
+  $('timeQuick').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pickTime(+b.dataset.m); });
+  $('timeList').addEventListener('click', e => { const b = e.target.closest('button'); if (b) pickTime(+b.dataset.m); });
+
+  function openEditor(id, restore = false) {
+    const it = id ? items.find(i => i.id === id) : null;
+    editingId = it ? it.id : null;
+    restoring = !!(it && restore);
+    $('editorTitle').textContent = restoring ? 'Move to Upcoming' : it ? 'Edit Activity' : 'New Activity';
+    $('fTitle').value = it ? it.title : '';
+    $('fCourse').value = it ? (it.course || '') : '';
+    $('fNotes').value = it ? (it.notes || '') : '';
+    setKind(it ? it.kind : (filter !== 'all' ? filter : 'assignment'));
+    let due = it ? it.due : null;
+    originalDue = it && !restoring ? it.due : null;
+    if (!due || (due <= Date.now() && !originalDue)) { const d = new Date(); d.setDate(d.getDate() + 1); d.setHours(23, 59, 0, 0); due = d.getTime(); }
+    setDue(due);
+    closePickers();
+    $('formError').hidden = true;
+    $('editActions').hidden = !it || restoring;
+    const courses = [...new Set(items.map(i => (i.course || '').trim()).filter(Boolean))].sort();
+    $('courses').innerHTML = courses.map(c => `<option value="${esc(c)}">`).join('');
+    updateSave();
+    editor.showModal();
+    if (!it) setTimeout(() => $('fTitle').focus(), 50);
+  }
+  function updateSave() { $('saveBtn').disabled = !$('fTitle').value.trim(); }
+  $('fTitle').addEventListener('input', updateSave);
+  $('cancelBtn').addEventListener('click', () => editor.close());
+  editor.addEventListener('click', e => { if (e.target === editor) editor.close(); });
+
+  $('form').addEventListener('submit', e => {
+    e.preventDefault();
+    const title = $('fTitle').value.trim();
+    if (!title) return;
+    const err = $('formError');
+    err.hidden = true;
+    const day = commitDate(), mins = commitTime();
+    if (!day || mins == null) return;
+    const due = new Date(day.getFullYear(), day.getMonth(), day.getDate(), Math.floor(mins / 60), mins % 60).getTime();
+    const keptOverdueDate = originalDue && Math.floor(due / 6e4) === Math.floor(originalDue / 6e4);
+    if (due <= Date.now() && !keptOverdueDate) { err.textContent = 'That time has already passed — pick a time in the future.'; err.hidden = false; return; }
+    const data = { title, course: $('fCourse').value.trim(), kind: formKind, due, notes: $('fNotes').value.trim() };
+    if (editingId) {
+      const it = items.find(i => i.id === editingId);
+      if (it) { Object.assign(it, data); if (restoring) delete it.doneAt; }
+    } else {
+      items.push({ id: uid(), created: Date.now(), ...data });
+    }
+    persist(); render(); editor.close();
+    toast(restoring ? 'Moved back to Upcoming' : editingId ? 'Saved' : 'Added');
+  });
+
+  $('doneBtn').addEventListener('click', () => { const id = editingId; editor.close(); markDone(id); });
+
+  // ---------- history detail ----------
+  const detail = $('detail');
+  function openDetail(id) {
+    const it = items.find(i => i.id === id);
+    if (!it) return;
+    detailId = id;
+    const kv = (k, v, cls = '') => `<div class="field kv"><label>${k}</label><div class="v ${cls}">${esc(v)}</div></div>`;
+    let status;
+    if (it.doneAt) status = `${fullDate(it.doneAt)} \u00b7 ${it.doneAt <= it.due ? 'on time' : 'late'}`;
+    $('detailInfo').innerHTML =
+      kv('Title', it.title) +
+      (it.course ? kv('Course', it.course) : '') +
+      kv('Type', KINDS[it.kind] || 'Other') +
+      kv('Due', fullDate(it.due)) +
+      (it.doneAt ? kv('Completed', status) : kv('Status', 'Not checked off'));
+    $('detailNotes').textContent = it.notes || '';
+    $('detailNotesBox').hidden = !it.notes;
+    detail.showModal();
+  }
+  $('detailClose').addEventListener('click', () => detail.close());
+  detail.addEventListener('click', e => { if (e.target === detail) detail.close(); });
+  $('restoreBtn').addEventListener('click', () => { detail.close(); openEditor(detailId, true); });
+  $('histDeleteBtn').addEventListener('click', () => { const id = detailId; detail.close(); confirmDelete(id); });
+  $('deleteBtn').addEventListener('click', () => { const id = editingId; editor.close(); confirmDelete(id); });
+  $('addBtn').addEventListener('click', () => openEditor(null));
+
+  // ---------- backup ----------
+  const menu = $('menu');
+  $('menuBtn').addEventListener('click', () => {
+    $('storeInfo').textContent = `${items.length} item${items.length === 1 ? '' : 's'} stored on this device.`;
+    menu.showModal();
+  });
+  $('menuClose').addEventListener('click', () => menu.close());
+  menu.addEventListener('click', e => { if (e.target === menu) menu.close(); });
+
+  $('exportBtn').addEventListener('click', async () => {
+    const d = new Date();
+    const name = `workduesoon-backup-${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}.json`;
+    const json = JSON.stringify({ app: 'due-soon', version: 1, exported: d.toISOString(), items }, null, 2);
+    const file = new File([json], name, { type: 'application/json' });
+    try {
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'WorkDueSoon backup' });
+        return;
+      }
+    } catch (e) { if (e && e.name === 'AbortError') return; }
+    const url = URL.createObjectURL(file);
+    const a = Object.assign(document.createElement('a'), { href: url, download: name });
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 4000);
+  });
+
+  $('importBtn').addEventListener('click', () => $('importFile').click());
+  $('importFile').addEventListener('change', async e => {
+    const f = e.target.files[0]; e.target.value = '';
+    if (!f) return;
+    try {
+      const data = JSON.parse(await f.text());
+      const incoming = (Array.isArray(data) ? data : data.items || []).filter(valid);
+      if (!incoming.length) throw new Error('empty');
+      const byId = new Map(items.map(i => [i.id, i]));
+      let added = 0;
+      for (const i of incoming) {
+        if (!byId.has(i.id)) added++;
+        byId.set(i.id, { id: i.id, title: i.title, course: i.course || '', kind: KINDS[i.kind] ? i.kind : 'other', due: i.due, notes: i.notes || '', created: i.created || Date.now(), ...(Number.isFinite(i.doneAt) ? { doneAt: i.doneAt } : {}) });
+      }
+      items = [...byId.values()];
+      persist(); render(); menu.close();
+      toast(`Restored — ${added} new item${added === 1 ? '' : 's'}`);
+    } catch { toast('That file isn’t a WorkDueSoon backup'); }
+  });
+
+  // ---------- appearance ----------
+  const darkMQ = matchMedia('(prefers-color-scheme: dark)');
+  const SUN = '<circle cx="12" cy="12" r="4.5"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>';
+  const MOON = '<path d="M20.5 14.5A8.5 8.5 0 0 1 9.5 3.5a8.5 8.5 0 1 0 11 11z"/>';
+  function getTheme() { try { const t = localStorage.getItem('duesoon.theme'); return t === 'light' || t === 'dark' ? t : 'auto'; } catch { return 'auto'; } }
+  function applyTheme(t) {
+    if (t === 'auto') delete document.documentElement.dataset.theme;
+    else document.documentElement.dataset.theme = t;
+    try { t === 'auto' ? localStorage.removeItem('duesoon.theme') : localStorage.setItem('duesoon.theme', t); } catch {}
+    const dark = t === 'dark' || (t === 'auto' && darkMQ.matches);
+    $('themeIcon').innerHTML = dark ? SUN : MOON;          // shows what you'll switch to
+    $('themeBtn').setAttribute('aria-label', dark ? 'Switch to light mode' : 'Switch to dark mode');
+    $('themeColor').setAttribute('content', dark ? '#000000' : '#f2f2f7');
+    for (const x of $('themeSeg').children) x.setAttribute('aria-pressed', x.dataset.t === t);
+  }
+  $('themeBtn').addEventListener('click', () => {
+    const t = getTheme();
+    const dark = t === 'dark' || (t === 'auto' && darkMQ.matches);
+    applyTheme(dark ? 'light' : 'dark');
+  });
+  $('themeSeg').addEventListener('click', e => { const b = e.target.closest('button'); if (b) applyTheme(b.dataset.t); });
+  darkMQ.addEventListener && darkMQ.addEventListener('change', () => applyTheme(getTheme()));
+  applyTheme(getTheme());
+
+  // ---------- toast ----------
+  let toastTimer;
+  function toast(msg, withUndo = false) {
+    $('toastMsg').textContent = msg;
+    $('toastUndo').hidden = !withUndo;
+    if (!withUndo) undo = null;
+    $('toast').classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => { $('toast').classList.remove('show'); undo = null; }, withUndo ? 5000 : 1800);
+  }
+  $('toastUndo').addEventListener('click', () => {
+    if (undo) undo();
+    undo = null;
+    $('toast').classList.remove('show');
+  });
+
+  // ---------- install hint ----------
+  const standalone = window.navigator.standalone === true || matchMedia('(display-mode: standalone)').matches;
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  let hintOff = false; try { hintOff = localStorage.getItem('duesoon.hint') === 'off'; } catch {}
+  if (isIOS && !standalone && !hintOff) $('installHint').hidden = false;
+  $('installClose').addEventListener('click', () => {
+    $('installHint').hidden = true;
+    try { localStorage.setItem('duesoon.hint', 'off'); } catch {}
+  });
+
+  // ---------- keep fresh ----------
+  render();
+  setInterval(render, 30000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+
+  // ---------- offline ----------
+  if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('sw.js').catch(() => {});
+  }
+})();
+</script>
+</body>
+</html>
